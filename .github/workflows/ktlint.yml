@@ -1,0 +1,25 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '2.6'
+          architecture: 'x64'
+      - name: install danger
+        run: |
+          gem install bundler
+          bundle install --path vendor/bundle
+      - name: run ktlint
+        run: git --no-pager diff --name-only origin/master..GITHUB_REF | grep -e '.kt$' -e '.kts$' | xargs -0 -I{} ./gradlew ktlintCheck -PinternalKtlintGitFilter={}
+      - name: run danger
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bundle exec danger
