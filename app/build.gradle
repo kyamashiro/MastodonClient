@@ -2,7 +2,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: "org.jlleitschuh.gradle.ktlint"
-import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 apply plugin: 'kotlin-kapt'
 
 android {
@@ -49,6 +48,6 @@ ktlint {
     outputColorName.set("RED")
     ignoreFailures.set(true)
     reporters {
-        reporter(ReporterType.CHECKSTYLE)
+        reporter("checkstyle")
     }
 }
