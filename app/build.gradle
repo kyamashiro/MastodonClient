@@ -1,13 +1,15 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: "org.jlleitschuh.gradle.ktlint"
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
 
     defaultConfig {
-        applicationId "com.example.mastodonclient"
+        applicationId "com.example.mastdonclient"
         minSdkVersion 16
         targetSdkVersion 29
         versionCode 1
@@ -34,4 +36,14 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+}
+
+ktlint {
+    android.set(false)
+    outputToConsole.set(true)
+    outputColorName.set("RED")
+    ignoreFailures.set(true)
+    reporters {
+        reporter(ReporterType.CHECKSTYLE)
+    }
 }
