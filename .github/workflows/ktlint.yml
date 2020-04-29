@@ -18,7 +18,7 @@ jobs:
           gem install bundler
           bundle install --path vendor/bundle
       - name: run ktlint
-        run: git --no-pager diff --name-only origin/master..GITHUB_REF | grep -e '.kt$' -e '.kts$' | xargs -0 -I{} ./gradlew ktlintCheck -PinternalKtlintGitFilter={}
+        run: git --no-pager diff --name-only origin/master..origin/$GITHUB_HEAD_REF | grep -e '.kt$' -e '.kts$' | xargs -0 -I{} ./gradlew ktlintCheck -PinternalKtlintGitFilter={}
       - name: run danger
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
