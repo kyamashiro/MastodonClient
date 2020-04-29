@@ -1,18 +1,3 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-
 # Created by https://www.gitignore.io/api/kotlin,android,intellij
 # Edit at https://www.gitignore.io/?templates=kotlin,android,intellij
 
