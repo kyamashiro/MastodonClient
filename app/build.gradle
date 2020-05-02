@@ -1,17 +1,16 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: "org.jlleitschuh.gradle.ktlint"
 apply plugin: 'kotlin-kapt'
+apply plugin: "org.jlleitschuh.gradle.ktlint"
 
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
-
+    // kapt
     dataBinding {
         enabled true
     }
-
     defaultConfig {
         applicationId "com.example.mastdonclient"
         minSdkVersion 16
@@ -28,7 +27,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
 }
 
 dependencies {
@@ -40,6 +38,12 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    // kapt dependencies
+    kapt "com.sun.xml.bind:jaxb-core:2.3.0.1"
+    kapt "javax.xml.bind:jaxb-api:2.3.1"
+    kapt "com.sun.xml.bind:jaxb-impl:2.3.2"
+    annotationProcessor "com.sun.xml.bind:jaxb-core:2.3.0.1"
+    annotationProcessor "javax.xml.bind:jaxb-api:2.3.1"
 }
 
 ktlint {
