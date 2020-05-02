@@ -44,6 +44,8 @@ dependencies {
     kapt "com.sun.xml.bind:jaxb-impl:2.3.2"
     annotationProcessor "com.sun.xml.bind:jaxb-core:2.3.0.1"
     annotationProcessor "javax.xml.bind:jaxb-api:2.3.1"
+    // fragment
+    implementation 'androidx.fragment:fragment-ktx:1.2.4'
 }
 
 ktlint {
