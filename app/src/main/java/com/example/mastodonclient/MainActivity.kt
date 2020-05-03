@@ -10,12 +10,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         // 画面が再生成されたときのことを考慮して画面がはじめて作成された時ににだけFragmentを追加するようにする
         if (savedInstanceState == null) {
-            val fragment = MainFragment()
+            val fragment = TootListFragment()
             supportFragmentManager.beginTransaction()
                 .add(
                     R.id.fragment_container,
                     fragment,
-                    MainFragment::class.java.simpleName
+                    TootListFragment.TAG
                 )
                 .commit()
         }
