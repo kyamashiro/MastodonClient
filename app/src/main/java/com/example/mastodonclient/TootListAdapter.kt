@@ -22,13 +22,13 @@ class TootListAdapter(private val layoutInflater: LayoutInflater, private val to
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        // layout xmlのdataにbindする
         holder.bind(tootList[position])
     }
 
     class ViewHolder(private val binding: ListItemTootBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(toot: Toot) {
-            binding.userName.text = toot.account.username
-            binding.content.text = toot.content
+            binding.toot = toot
         }
     }
 }
