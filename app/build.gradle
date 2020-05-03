@@ -7,6 +7,16 @@ apply plugin: "org.jlleitschuh.gradle.ktlint"
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
+    // Okhttp3のバージョンが3.13以降の場合、 compileOptionsでJava 8の機能を有効化する必要がある
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+    // 必要ない?
+//    kotlinOptions {
+//        jvmTarget = 1.8
+//    }
+
     // kapt
     dataBinding {
         enabled true
@@ -46,6 +56,10 @@ dependencies {
     annotationProcessor "javax.xml.bind:jaxb-api:2.3.1"
     // fragment
     implementation 'androidx.fragment:fragment-ktx:1.2.4'
+    // http client
+    implementation 'com.squareup.retrofit2:retrofit:2.7.1'
+    // main threadでhttp通信できないのでcoroutineを追加する
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.3"
 }
 
 ktlint {
