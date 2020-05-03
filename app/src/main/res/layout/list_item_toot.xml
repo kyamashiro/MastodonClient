@@ -20,7 +20,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="keiji"/>
+            tools:text="keiji"
+        />
 
         <TextView
             android:id="@+id/content"
@@ -31,7 +32,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/user_name"
             tools:text="ちなみに今日の時点でのAndroid Studioから見えるバージョン別シェア。
-            よくよく考えたらAndroid Pieの記載がないので、Android Studioが表示しているデータはかなり古い。"/>
+            よくよく考えたらAndroid Pieの記載がないので、Android Studioが表示しているデータはかなり古い。"
+        />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/content"
+            app:media="@{toot.topMedia}"
+            tools:src="@mipmap/ic_launcher"
+        />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
