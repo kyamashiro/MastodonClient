@@ -1,20 +1,16 @@
 package com.example.mastodonclient
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mastodonclient.databinding.FragmentTootListBinding
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class TootListFragment : Fragment(R.layout.fragment_toot_list) {
     // singleton API
@@ -24,7 +20,6 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
     }
 
     private var binding: FragmentTootListBinding? = null
-    private val tootRepository = TootRepository(API_BASE_URL)
 
     // 遅延初期化
     private lateinit var adapter: TootListAdapter
@@ -33,19 +28,24 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
     // 取得したTootをセットするためのList
     private val tootList = MutableLiveData<ArrayList<Toot>>()
 
-    // ようわからんけどLiveDataは監視されていて値が監視されているらしい
+    // ようわからんけどLiveDataはObserverパターンで値が監視されているらしい
     private var isLoading = MutableLiveData<Boolean>()
 
-    // スレッドセーフなboolean
-    private var hasNext = AtomicBoolean().apply { set(true) }
+    private val viewModel: TootListViewModel by viewModels {
+        TootListViewModelFactory(
+            API_BASE_URL,
+            lifecycleScope,
+            requireContext()
+        )
+    }
 
     // Scrollでの読み込み動作
     private val loadNextScrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             // loading中, 次のデータがない場合は読み込みしない
-            val isLoadingSnapshot = isLoading.value ?: return
-            if (isLoadingSnapshot || !hasNext.get()) {
+            val isLoadingSnapshot = viewModel.isLoading.value ?: return
+            if (isLoadingSnapshot || !viewModel.hasNext) {
                 return
             }
 
@@ -54,7 +54,7 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
             val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
 
             if ((totalItemCount - visibleItemCount) <= firstVisibleItemPosition) {
-                loadNext()
+                viewModel.loadNext()
             }
         }
     }
@@ -62,8 +62,8 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // 　tootListの値をArrayListとして代入する
-        val tootListSnapshot = tootList.value ?: ArrayList<Toot>().also {
-            tootList.value = it
+        val tootListSnapshot = viewModel.tootList.value ?: ArrayList<Toot>().also {
+            viewModel.tootList.value = it
         }
         // LayoutInflaterは、xmlレイアウトの1つから新しいView（またはLayout）オブジェクトを作成する
         // 動的にxmlレイアウトをセットできる
@@ -83,53 +83,22 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
         }
         // refreshしたときの動作
         bindingData.swipeRefreshLayout.setOnRefreshListener {
-            tootListSnapshot.clear()
-            loadNext()
+            viewModel.clear()
+            viewModel.loadNext()
         }
         // isLoadingの値を監視しプログレスバーの表示を制御する
-        isLoading.observe(viewLifecycleOwner, Observer {
+        viewModel.isLoading.observe(viewLifecycleOwner, Observer {
             binding?.swipeRefreshLayout?.isRefreshing = it
         })
         // LiveDataの監視 フラグメントに反映させる
-        tootList.observe(viewLifecycleOwner, Observer {
+        viewModel.tootList.observe(viewLifecycleOwner, Observer {
             adapter.notifyDataSetChanged()
         })
-        loadNext()
+        viewLifecycleOwner.lifecycle.addObserver(viewModel)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         binding?.unbind()
-    }
-
-    // スクロールしてTootを読み込む
-    private fun loadNext() {
-        lifecycleScope.launch {
-            // loadingをセット
-            isLoading.postValue(true)
-            // tootListを取得済みの場合はlaunchのスコープから抜ける?
-            val tootListSnapshot = tootList.value ?: return@launch
-            // APIからデータを取得
-            val tootListResponse = tootRepository.fetchPublicTimeline(
-                maxId = tootListSnapshot.lastOrNull()?.id,
-                onlyMedia = true
-            )
-            // Listに追加
-            tootListSnapshot.addAll(tootListResponse.filter { !it.sensitive })
-            Log.d(TAG, "addAll")
-            // obserrに通知する
-            reloadTootList()
-            Log.d(TAG, "reloadTootList")
-            // 読み込みを終了
-            isLoading.postValue(false)
-            // 次の取得データが存在するかセット
-            hasNext.set(tootListResponse.isNotEmpty())
-            Log.d(TAG, "dismissProgress")
-        }
-    }
-
-    private suspend fun reloadTootList() = withContext(Dispatchers.Main) {
-        // DataSetが変更されたことを通知する
-        adapter.notifyDataSetChanged()
     }
 }

@@ -12,10 +12,11 @@ android {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
     }
-    // 必要ない?
-//    kotlinOptions {
-//        jvmTarget = 1.8
-//    }
+    // Cannot inline bytecode built with JVM target 1.8 into bytecode that is being built with JVM target 1.6. Please specify proper '-jvm-target' option
+    // private val viewModel: TootListViewModel by viewModels でエラーが出る
+    kotlinOptions {
+        jvmTarget = 1.8
+    }
 
     // kapt
     dataBinding {
