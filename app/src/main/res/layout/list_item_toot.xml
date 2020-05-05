@@ -34,11 +34,12 @@
             tools:text="ちなみに今日の時点でのAndroid Studioから見えるバージョン別シェア。
             よくよく考えたらAndroid Pieの記載がないので、Android Studioが表示しているデータはかなり古い。"
         />
-
+        <!-- adjustViewBoundsで縦横比を一定にする -->
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image"
-            android:layout_width="match_parent"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/content"
