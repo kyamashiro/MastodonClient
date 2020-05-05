@@ -5,13 +5,13 @@ import android.util.Log
 import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mastodonclient.databinding.FragmentTootListBinding
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -42,7 +42,8 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
     // 遅延初期化
     private lateinit var adapter: TootListAdapter
     private lateinit var layoutManager: LinearLayoutManager
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+    // 取得したTootをセットするためのList
     private val tootList = ArrayList<Toot>()
 
     // スレッドセーフなboolean
@@ -102,16 +103,18 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
 
     // スクロールしてTootを読み込む
     private fun loadNext() {
-        coroutineScope.launch {
+        lifecycleScope.launch {
             // loadingをセット
             isLoading.set(true)
             // 読み込み中のバーを表示
             showProgress()
             // APIからデータを取得
-            val tootListResponse = api.fetchPublicTimeline(
-                maxId = tootList.lastOrNull()?.id,
-                onlyMedia = true
-            )
+            val tootListResponse = withContext(Dispatchers.IO) {
+                api.fetchPublicTimeline(
+                    maxId = tootList.lastOrNull()?.id,
+                    onlyMedia = true
+                )
+            }
             Log.d(TAG, "fetchPublicTimeline")
             // Listに追加
             tootList.addAll(tootListResponse.filter { !it.sensitive })
