@@ -5,6 +5,8 @@ import android.util.Log
 import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -44,10 +46,12 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
     private lateinit var layoutManager: LinearLayoutManager
 
     // 取得したTootをセットするためのList
-    private val tootList = ArrayList<Toot>()
+    private val tootList = MutableLiveData<ArrayList<Toot>>()
+
+    // ようわからんけどLiveDataは監視されていて値が監視されているらしい
+    private var isLoading = MutableLiveData<Boolean>()
 
     // スレッドセーフなboolean
-    private var isLoading = AtomicBoolean()
     private var hasNext = AtomicBoolean().apply { set(true) }
 
     // Scrollでの読み込み動作
@@ -55,7 +59,8 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             // loading中, 次のデータがない場合は読み込みしない
-            if (isLoading.get() || !hasNext.get()) {
+            val isLoadingSnapshot = isLoading.value ?: return
+            if (isLoadingSnapshot || !hasNext.get()) {
                 return
             }
 
@@ -71,9 +76,13 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // 　tootListの値をArrayListとして代入する
+        val tootListSnapshot = tootList.value ?: ArrayList<Toot>().also {
+            tootList.value = it
+        }
         // LayoutInflaterは、xmlレイアウトの1つから新しいView（またはLayout）オブジェクトを作成する
         // 動的にxmlレイアウトをセットできる
-        adapter = TootListAdapter(layoutInflater, tootList)
+        adapter = TootListAdapter(layoutInflater, tootListSnapshot)
         layoutManager = LinearLayoutManager(
             requireContext(),
             LinearLayoutManager.VERTICAL,
@@ -89,10 +98,17 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
         }
         // refreshしたときの動作
         bindingData.swipeRefreshLayout.setOnRefreshListener {
-            tootList.clear()
+            tootListSnapshot.clear()
             loadNext()
         }
-
+        // isLoadingの値を監視しプログレスバーの表示を制御する
+        isLoading.observe(viewLifecycleOwner, Observer {
+            binding?.swipeRefreshLayout?.isRefreshing = it
+        })
+        // LiveDataの監視 フラグメントに反映させる
+        tootList.observe(viewLifecycleOwner, Observer {
+            adapter.notifyDataSetChanged()
+        })
         loadNext()
     }
 
@@ -105,38 +121,29 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
     private fun loadNext() {
         lifecycleScope.launch {
             // loadingをセット
-            isLoading.set(true)
-            // 読み込み中のバーを表示
-            showProgress()
+            isLoading.postValue(true)
+            // tootListを取得済みの場合はlaunchのスコープから抜ける?
+            val tootListSnapshot = tootList.value ?: return@launch
             // APIからデータを取得
             val tootListResponse = withContext(Dispatchers.IO) {
                 api.fetchPublicTimeline(
-                    maxId = tootList.lastOrNull()?.id,
+                    maxId = tootListSnapshot.lastOrNull()?.id,
                     onlyMedia = true
                 )
             }
             Log.d(TAG, "fetchPublicTimeline")
             // Listに追加
-            tootList.addAll(tootListResponse.filter { !it.sensitive })
+            tootListSnapshot.addAll(tootListResponse.filter { !it.sensitive })
             Log.d(TAG, "addAll")
             // obserrに通知する
             reloadTootList()
             Log.d(TAG, "reloadTootList")
             // 読み込みを終了
-            isLoading.set(false)
+            isLoading.postValue(false)
             // 次の取得データが存在するかセット
             hasNext.set(tootListResponse.isNotEmpty())
-            dismissProgress()
             Log.d(TAG, "dismissProgress")
         }
-    }
-
-    private suspend fun showProgress() = withContext(Dispatchers.Main) {
-        binding?.swipeRefreshLayout?.isRefreshing = true
-    }
-
-    private suspend fun dismissProgress() = withContext(Dispatchers.Main) {
-        binding?.swipeRefreshLayout?.isRefreshing = false
     }
 
     private suspend fun reloadTootList() = withContext(Dispatchers.Main) {
