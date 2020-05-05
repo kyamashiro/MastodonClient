@@ -70,6 +70,8 @@ dependencies {
     // 画像読み込みライブラリ
     implementation 'com.github.bumptech.glide:glide:4.10.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.10.0'
+    // スワイプでの更新操作をサポートするライブラリ
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
 }
 
 ktlint {
