@@ -11,14 +11,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mastodonclient.databinding.FragmentTootListBinding
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
 
 class TootListFragment : Fragment(R.layout.fragment_toot_list) {
     // singleton API
@@ -28,18 +24,7 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
     }
 
     private var binding: FragmentTootListBinding? = null
-
-    // JSON Parser
-    private val moshi = Moshi.Builder()
-        .add(KotlinJsonAdapterFactory())
-        .build()
-
-    // http client
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(API_BASE_URL)
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
-        .build()
-    private val api = retrofit.create(MastodonApi::class.java)
+    private val tootRepository = TootRepository(API_BASE_URL)
 
     // 遅延初期化
     private lateinit var adapter: TootListAdapter
@@ -125,13 +110,10 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
             // tootListを取得済みの場合はlaunchのスコープから抜ける?
             val tootListSnapshot = tootList.value ?: return@launch
             // APIからデータを取得
-            val tootListResponse = withContext(Dispatchers.IO) {
-                api.fetchPublicTimeline(
-                    maxId = tootListSnapshot.lastOrNull()?.id,
-                    onlyMedia = true
-                )
-            }
-            Log.d(TAG, "fetchPublicTimeline")
+            val tootListResponse = tootRepository.fetchPublicTimeline(
+                maxId = tootListSnapshot.lastOrNull()?.id,
+                onlyMedia = true
+            )
             // Listに追加
             tootListSnapshot.addAll(tootListResponse.filter { !it.sensitive })
             Log.d(TAG, "addAll")
