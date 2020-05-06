@@ -92,6 +92,7 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.10.0'
     // スワイプでの更新操作をサポートするライブラリ
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
+    implementation "com.google.android.material:material:1.1.0"
 }
 
 ktlint {
