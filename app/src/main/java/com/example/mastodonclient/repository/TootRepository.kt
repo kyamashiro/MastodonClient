@@ -1,5 +1,7 @@
-package com.example.mastodonclient
+package com.example.mastodonclient.repository
 
+import com.example.mastodonclient.MastodonApi
+import com.example.mastodonclient.entity.UserCredential
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers

@@ -1,10 +1,12 @@
-package com.example.mastodonclient
+package com.example.mastodonclient.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mastodonclient.R
 import com.example.mastodonclient.databinding.ListItemMediaBinding
+import com.example.mastodonclient.entity.Media
 
 class MediaListAdapter(
     private val layoutInflater: LayoutInflater

@@ -1,10 +1,13 @@
-package com.example.mastodonclient
+package com.example.mastodonclient.ui
 
 import android.os.Bundle
 import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import com.example.mastodonclient.MastodonApi
+import com.example.mastodonclient.R
 import com.example.mastodonclient.databinding.FragmentMainBinding
+import com.example.mastodonclient.entity.Toot
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope

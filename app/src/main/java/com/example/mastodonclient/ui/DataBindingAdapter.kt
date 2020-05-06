@@ -1,10 +1,11 @@
-package com.example.mastodonclient
+package com.example.mastodonclient.ui
 
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
+import com.example.mastodonclient.entity.Media
 
 // 既存のクラスを拡張しているっぽい
 // https://jumperson.hatenablog.com/entry/2016/06/07/135256

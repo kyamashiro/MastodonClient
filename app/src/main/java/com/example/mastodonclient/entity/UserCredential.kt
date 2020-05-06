@@ -1,4 +1,4 @@
-package com.example.mastodonclient
+package com.example.mastodonclient.entity
 
 data class UserCredential(
     val instanceUrl: String,

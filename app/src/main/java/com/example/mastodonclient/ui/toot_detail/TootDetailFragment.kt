@@ -1,4 +1,4 @@
-package com.example.mastodonclient
+package com.example.mastodonclient.ui.toot_detail
 
 import android.os.Bundle
 import android.view.View
@@ -9,7 +9,10 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.mastodonclient.R
 import com.example.mastodonclient.databinding.FragmentTootDetailBinding
+import com.example.mastodonclient.entity.Toot
+import com.example.mastodonclient.ui.MediaListAdapter
 
 class TootDetailFragment : Fragment(R.layout.fragment_toot_detail) {
 
@@ -65,7 +68,9 @@ class TootDetailFragment : Fragment(R.layout.fragment_toot_detail) {
             LinearLayoutManager.HORIZONTAL,
             false
         )
-        bindingData.recyclerView.adapter = MediaListAdapter(layoutInflater).also {
+        bindingData.recyclerView.adapter = MediaListAdapter(
+            layoutInflater
+        ).also {
             adapter = it
         }
 

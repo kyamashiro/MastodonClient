@@ -1,6 +1,8 @@
-package com.example.mastodonclient
+package com.example.mastodonclient.repository
 
 import android.app.Application
+import com.example.mastodonclient.BuildConfig
+import com.example.mastodonclient.entity.UserCredential
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

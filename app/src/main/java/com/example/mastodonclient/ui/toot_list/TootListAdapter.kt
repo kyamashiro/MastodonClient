@@ -1,10 +1,12 @@
-package com.example.mastodonclient
+package com.example.mastodonclient.ui.toot_list
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mastodonclient.R
 import com.example.mastodonclient.databinding.ListItemTootBinding
+import com.example.mastodonclient.entity.Toot
 
 class TootListAdapter(
     private val layoutInflater: LayoutInflater,

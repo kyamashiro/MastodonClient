@@ -1,7 +1,9 @@
-package com.example.mastodonclient
+package com.example.mastodonclient.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.example.mastodonclient.R
+import com.example.mastodonclient.ui.toot_list.TootListFragment
 
 class MainActivity : AppCompatActivity() {
 
