@@ -15,7 +15,7 @@ import com.example.mastodonclient.R
 import com.example.mastodonclient.databinding.FragmentTootListBinding
 import com.example.mastodonclient.entity.Account
 import com.example.mastodonclient.entity.Toot
-import com.example.mastodonclient.ui.toot_detail.TootDetailFragment
+import com.example.mastodonclient.ui.toot_detail.TootDetailActivity
 
 class TootListFragment : Fragment(R.layout.fragment_toot_list),
     TootListAdapter.Callback {
@@ -144,13 +144,8 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
         }
     }
 
-    // Toot詳細を
     override fun openDetail(toot: Toot) {
-        // 詳細画面のインスタンスを取得する
-        val fragment = TootDetailFragment.newInstance(toot)
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .addToBackStack(TootDetailFragment.TAG)
-            .commit()
+        val intent = TootDetailActivity.newIntent(requireContext(), toot)
+        startActivity(intent)
     }
 }
