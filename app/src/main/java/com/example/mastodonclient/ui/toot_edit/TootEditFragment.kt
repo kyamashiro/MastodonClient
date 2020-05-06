@@ -28,6 +28,12 @@ class TootEditFragment : Fragment(R.layout.fragment_toot_edit) {
         }
     }
 
+    interface Callback {
+        fun onPostComplete()
+    }
+
+    private var callback: Callback? = null
+
     private var binding: FragmentTootEditBinding? = null
 
     private val viewModel: TootEditViewModel by viewModels {
@@ -42,6 +48,9 @@ class TootEditFragment : Fragment(R.layout.fragment_toot_edit) {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         setHasOptionsMenu(true)
+        if (context is Callback) {
+            callback = context
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -55,6 +64,7 @@ class TootEditFragment : Fragment(R.layout.fragment_toot_edit) {
 
         viewModel.postComplete.observe(viewLifecycleOwner, Observer {
             Toast.makeText(requireContext(), "投稿完了しました", Toast.LENGTH_LONG).show()
+            callback?.onPostComplete()
         })
         viewModel.errorMessage.observe(viewLifecycleOwner, Observer {
             Snackbar.make(view, it, Snackbar.LENGTH_LONG).show()
