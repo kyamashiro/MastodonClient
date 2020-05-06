@@ -6,8 +6,16 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mastodonclient.databinding.ListItemTootBinding
 
-class TootListAdapter(private val layoutInflater: LayoutInflater, private val tootList: ArrayList<Toot>) :
+class TootListAdapter(
+    private val layoutInflater: LayoutInflater,
+    private val tootList: ArrayList<Toot>,
+    private val callback: Callback?
+) :
     RecyclerView.Adapter<TootListAdapter.ViewHolder>() {
+
+    interface Callback {
+        fun openDetail(toot: Toot)
+    }
 
     override fun getItemCount() = tootList.size
 
@@ -18,7 +26,7 @@ class TootListAdapter(private val layoutInflater: LayoutInflater, private val to
             parent,
             false
         )
-        return ViewHolder(binding)
+        return ViewHolder(binding, callback)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -26,9 +34,15 @@ class TootListAdapter(private val layoutInflater: LayoutInflater, private val to
         holder.bind(tootList[position])
     }
 
-    class ViewHolder(private val binding: ListItemTootBinding) : RecyclerView.ViewHolder(binding.root) {
+    class ViewHolder(
+        private val binding: ListItemTootBinding,
+        private val callback: Callback?
+    ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(toot: Toot) {
             binding.toot = toot
+            binding.root.setOnClickListener {
+                callback?.openDetail(toot)
+            }
         }
     }
 }

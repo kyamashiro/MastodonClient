@@ -12,11 +12,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mastodonclient.databinding.FragmentTootListBinding
 
-class TootListFragment : Fragment(R.layout.fragment_toot_list) {
+class TootListFragment : Fragment(R.layout.fragment_toot_list),
+    TootListAdapter.Callback {
     // singleton API
     companion object {
         val TAG = TootListFragment::class.java.simpleName
-        private const val API_BASE_URL = "https://androidbook2020.keiji.io"
     }
 
     private var binding: FragmentTootListBinding? = null
@@ -62,7 +62,7 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
         }
         // LayoutInflaterは、xmlレイアウトの1つから新しいView（またはLayout）オブジェクトを作成する
         // 動的にxmlレイアウトをセットできる
-        adapter = TootListAdapter(layoutInflater, tootListSnapshot)
+        adapter = TootListAdapter(layoutInflater, tootListSnapshot, this)
         layoutManager = LinearLayoutManager(
             requireContext(),
             LinearLayoutManager.VERTICAL,
@@ -106,5 +106,14 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
         if (activity is AppCompatActivity) {
             activity.supportActionBar?.subtitle = accountInfo.username
         }
+    }
+    // Toot詳細を
+    override fun openDetail(toot: Toot) {
+        // 詳細画面のインスタンスを取得する
+        val fragment = TootDetailFragment.newInstance(toot)
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(TootDetailFragment.TAG)
+            .commit()
     }
 }

@@ -1,7 +1,10 @@
 package com.example.mastodonclient
 
+import android.os.Parcelable
 import com.squareup.moshi.Json
+import kotlinx.android.parcel.Parcelize
 
+@Parcelize
 data class Toot(
     val id: String,
     val sensitive: Boolean,
@@ -11,7 +14,7 @@ data class Toot(
     val account: Account,
     // JSONのキーとフィールド名を変わる場合などでは、@Json アノテーションを付ける
     @Json(name = "created_at") val createdAt: String
-) {
+) : Parcelable {
     val topMedia: Media?
         get() = mediaAttachments.firstOrNull()
 }
