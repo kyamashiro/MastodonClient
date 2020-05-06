@@ -5,7 +5,6 @@ import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,15 +24,10 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list) {
     private lateinit var adapter: TootListAdapter
     private lateinit var layoutManager: LinearLayoutManager
 
-    // 取得したTootをセットするためのList
-    private val tootList = MutableLiveData<ArrayList<Toot>>()
-
-    // ようわからんけどLiveDataはObserverパターンで値が監視されているらしい
-    private var isLoading = MutableLiveData<Boolean>()
-
     private val viewModel: TootListViewModel by viewModels {
         TootListViewModelFactory(
-            API_BASE_URL,
+            BuildConfig.INSTANCE_URL,
+            BuildConfig.USERNAME,
             lifecycleScope,
             requireContext()
         )
