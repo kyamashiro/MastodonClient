@@ -22,6 +22,18 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
     // singleton API
     companion object {
         val TAG = TootListFragment::class.java.simpleName
+
+        private const val BUNDLE_KEY_TIMELINE_TYPE_ORDINAL = "timeline_type_ordinal"
+
+        @JvmStatic
+        fun newInstance(timelineType: TimelineType): TootListFragment {
+            val args = Bundle().apply {
+                putInt(BUNDLE_KEY_TIMELINE_TYPE_ORDINAL, timelineType.ordinal)
+            }
+            return TootListFragment().apply {
+                arguments = args
+            }
+        }
     }
 
     private var binding: FragmentTootListBinding? = null
@@ -30,10 +42,25 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
     private lateinit var adapter: TootListAdapter
     private lateinit var layoutManager: LinearLayoutManager
 
+    private var timelineType = TimelineType.PublicTimeline
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        requireArguments().also {
+            val typeOrdinal = it.getInt(
+                BUNDLE_KEY_TIMELINE_TYPE_ORDINAL,
+                TimelineType.PublicTimeline.ordinal
+            )
+            timelineType = TimelineType.values()[typeOrdinal]
+        }
+    }
+
     private val viewModel: TootListViewModel by viewModels {
         TootListViewModelFactory(
             BuildConfig.INSTANCE_URL,
             BuildConfig.USERNAME,
+            timelineType,
             lifecycleScope,
             requireContext()
         )
@@ -116,6 +143,7 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
             activity.supportActionBar?.subtitle = accountInfo.username
         }
     }
+
     // Toot詳細を
     override fun openDetail(toot: Toot) {
         // 詳細画面のインスタンスを取得する
