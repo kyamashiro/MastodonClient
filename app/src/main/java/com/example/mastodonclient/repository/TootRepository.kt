@@ -1,6 +1,7 @@
 package com.example.mastodonclient.repository
 
 import com.example.mastodonclient.MastodonApi
+import com.example.mastodonclient.entity.Toot
 import com.example.mastodonclient.entity.UserCredential
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -40,6 +41,15 @@ class TootRepository(
         api.fetchHomeTimeline(
             accessToken = "Bearer ${userCredential.accessToken}",
             maxId = maxId
+        )
+    }
+
+    suspend fun postToot(
+        status: String
+    ): Toot = withContext(Dispatchers.IO) {
+        return@withContext api.postToot(
+            "Bearer ${userCredential.accessToken}",
+            status
         )
     }
 }

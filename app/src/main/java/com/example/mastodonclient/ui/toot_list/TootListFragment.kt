@@ -16,6 +16,7 @@ import com.example.mastodonclient.databinding.FragmentTootListBinding
 import com.example.mastodonclient.entity.Account
 import com.example.mastodonclient.entity.Toot
 import com.example.mastodonclient.ui.toot_detail.TootDetailActivity
+import com.example.mastodonclient.ui.toot_edit.TootEditActivity
 
 class TootListFragment : Fragment(R.layout.fragment_toot_list),
     TootListAdapter.Callback {
@@ -117,10 +118,15 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
             viewModel.clear()
             viewModel.loadNext()
         }
+        // r.id.fab 投稿ボタンをタップしたときに投稿画面に遷移する
+        bindingData.fab.setOnClickListener {
+            launchTootEditActivity()
+        }
         // isLoadingの値を監視しプログレスバーの表示を制御する
         viewModel.isLoading.observe(viewLifecycleOwner, Observer {
             binding?.swipeRefreshLayout?.isRefreshing = it
         })
+        // アカウント名をアクションバーにセットする
         viewModel.accountInfo.observe(viewLifecycleOwner, Observer {
             showAccountInfo(it)
         })
@@ -134,6 +140,11 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
     override fun onDestroyView() {
         super.onDestroyView()
         binding?.unbind()
+    }
+
+    private fun launchTootEditActivity() {
+        val intent = TootEditActivity.newIntent(requireContext())
+        startActivity(intent)
     }
 
     // アクションバーにユーザ名をセットする
