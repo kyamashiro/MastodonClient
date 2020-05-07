@@ -11,17 +11,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.toot_edit.TootEditActivity">
-        </activity>
         <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".ui.toot_detail.TootDetailActivity"/>
-        <activity android:name=".ui.toot_edit.TootEditActivity" />
+        <activity android:name=".ui.toot_edit.TootEditActivity"
+                  android:windowSoftInputMode="adjustResize"
+        />
     </application>
 
 </manifest>
