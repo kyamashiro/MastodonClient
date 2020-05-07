@@ -17,6 +17,7 @@ import com.example.mastodonclient.R
 import com.example.mastodonclient.databinding.FragmentTootListBinding
 import com.example.mastodonclient.entity.Account
 import com.example.mastodonclient.entity.Toot
+import com.example.mastodonclient.ui.login.LoginActivity
 import com.example.mastodonclient.ui.toot_detail.TootDetailActivity
 import com.example.mastodonclient.ui.toot_edit.TootEditActivity
 
@@ -28,6 +29,7 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
 
         private const val BUNDLE_KEY_TIMELINE_TYPE_ORDINAL = "timeline_type_ordinal"
         private const val REQUEST_CODE_TOOT_EDIT = 0x01
+        private const val REQUEST_CODE_LOGIN = 0x02
 
         @JvmStatic
         fun newInstance(timelineType: TimelineType): TootListFragment {
@@ -125,6 +127,11 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
         bindingData.fab.setOnClickListener {
             launchTootEditActivity()
         }
+        viewModel.loginRequired.observe(viewLifecycleOwner, Observer {
+            if (it) {
+                launchLoginActivity()
+            }
+        })
         // isLoadingの値を監視しプログレスバーの表示を制御する
         viewModel.isLoading.observe(viewLifecycleOwner, Observer {
             binding?.swipeRefreshLayout?.isRefreshing = it
@@ -140,12 +147,18 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
         viewLifecycleOwner.lifecycle.addObserver(viewModel)
     }
 
+    override fun openDetail(toot: Toot) {
+        val intent = TootDetailActivity.newIntent(requireContext(), toot)
+        startActivity(intent)
+    }
+
     // アクティビティから結果を受け取る
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         // 投稿完了時にタイムラインを再読込する
         if (requestCode == REQUEST_CODE_TOOT_EDIT &&
-            resultCode == Activity.RESULT_OK) {
+            resultCode == Activity.RESULT_OK
+        ) {
             viewModel.clear()
             viewModel.loadNext()
         }
@@ -169,9 +182,9 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
         }
     }
 
-    override fun openDetail(toot: Toot) {
-        val intent = TootDetailActivity.newIntent(requireContext(), toot)
-        startActivity(intent)
+    private fun launchLoginActivity() {
+        val intent = Intent(requireContext(), LoginActivity::class.java)
+        startActivityForResult(intent, REQUEST_CODE_LOGIN)
     }
 
     override fun delete(toot: Toot) {
