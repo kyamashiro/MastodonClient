@@ -2,6 +2,7 @@ package com.example.mastodonclient.ui.toot_list
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mastodonclient.R
@@ -17,6 +18,7 @@ class TootListAdapter(
 
     interface Callback {
         fun openDetail(toot: Toot)
+        fun delete(toot: Toot)
     }
 
     override fun getItemCount() = tootList.size
@@ -44,6 +46,20 @@ class TootListAdapter(
             binding.toot = toot
             binding.root.setOnClickListener {
                 callback?.openDetail(toot)
+            }
+            binding.more.setOnClickListener {
+                PopupMenu(itemView.context, it).also { popupMenu ->
+                    popupMenu.menuInflater.inflate(
+                        R.menu.toot_detail,
+                        popupMenu.menu
+                    )
+                    popupMenu.setOnMenuItemClickListener { menuItem ->
+                        when (menuItem.itemId) {
+                            R.id.menu_delete -> callback?.delete(toot)
+                        }
+                        return@setOnMenuItemClickListener true
+                    }
+                }.show()
             }
         }
     }
