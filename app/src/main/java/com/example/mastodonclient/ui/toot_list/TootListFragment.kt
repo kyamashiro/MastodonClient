@@ -1,5 +1,7 @@
 package com.example.mastodonclient.ui.toot_list
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +27,7 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
         val TAG = TootListFragment::class.java.simpleName
 
         private const val BUNDLE_KEY_TIMELINE_TYPE_ORDINAL = "timeline_type_ordinal"
+        private const val REQUEST_CODE_TOOT_EDIT = 0x01
 
         @JvmStatic
         fun newInstance(timelineType: TimelineType): TootListFragment {
@@ -137,6 +140,17 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
         viewLifecycleOwner.lifecycle.addObserver(viewModel)
     }
 
+    // アクティビティから結果を受け取る
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        // 投稿完了時にタイムラインを再読込する
+        if (requestCode == REQUEST_CODE_TOOT_EDIT &&
+            resultCode == Activity.RESULT_OK) {
+            viewModel.clear()
+            viewModel.loadNext()
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         binding?.unbind()
@@ -144,7 +158,7 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
 
     private fun launchTootEditActivity() {
         val intent = TootEditActivity.newIntent(requireContext())
-        startActivity(intent)
+        startActivityForResult(intent, REQUEST_CODE_TOOT_EDIT)
     }
 
     // アクションバーにユーザ名をセットする
