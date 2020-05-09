@@ -21,6 +21,7 @@ import com.example.mastodonclient.entity.Toot
 import com.example.mastodonclient.ui.login.LoginActivity
 import com.example.mastodonclient.ui.toot_detail.TootDetailActivity
 import com.example.mastodonclient.ui.toot_edit.TootEditActivity
+import com.google.android.material.snackbar.Snackbar
 
 class TootListFragment : Fragment(R.layout.fragment_toot_list),
     TootListAdapter.Callback {
@@ -137,6 +138,10 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
         // isLoadingの値を監視しプログレスバーの表示を制御する
         viewModel.isLoading.observe(viewLifecycleOwner, Observer {
             binding?.swipeRefreshLayout?.isRefreshing = it
+        })
+        // エラーメッセージの表示
+        viewModel.errorMessage.observe(viewLifecycleOwner, Observer {
+            Snackbar.make(bindingData.swipeRefreshLayout, it, Snackbar.LENGTH_LONG).show()
         })
         // アカウント名をアクションバーにセットする
         viewModel.accountInfo.observe(viewLifecycleOwner, Observer {

@@ -12,8 +12,11 @@ import com.example.mastodonclient.entity.UserCredential
 import com.example.mastodonclient.repository.AccountRepository
 import com.example.mastodonclient.repository.TootRepository
 import com.example.mastodonclient.repository.UserCredentialRepository
+import java.io.IOException
+import java.net.HttpURLConnection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 class TootListViewModel(
     private val instanceUrl: String,
@@ -37,6 +40,7 @@ class TootListViewModel(
     var hasNext = true
     val accountInfo = MutableLiveData<Account>()
     val tootList = MutableLiveData<ArrayList<Toot>>()
+    val errorMessage = MutableLiveData<String>()
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
@@ -69,24 +73,37 @@ class TootListViewModel(
 
             val maxId = tootListSnapshot.lastOrNull()?.id
             // timelineTypeによって取得するデータを変更する
-            val tootListResponse = when (timelineType) {
-                TimelineType.PublicTimeline -> {
-                    tootRepository.fetchPublicTimeline(
-                        maxId = maxId,
-                        onlyMedia = true
-                    )
+            try {
+                val tootListResponse = when (timelineType) {
+                    TimelineType.PublicTimeline -> {
+                        tootRepository.fetchPublicTimeline(
+                            maxId = maxId,
+                            onlyMedia = true
+                        )
+                    }
+                    TimelineType.HomeTimeline -> {
+                        tootRepository.fetchHomeTimeline(
+                            maxId = maxId
+                        )
+                    }
                 }
-                TimelineType.HomeTimeline -> {
-                    tootRepository.fetchHomeTimeline(
-                        maxId = maxId
-                    )
-                }
-            }
-            tootListSnapshot.addAll(tootListResponse)
-            tootList.postValue(tootListSnapshot)
 
-            hasNext = tootListResponse.isNotEmpty()
-            isLoading.postValue(false)
+                tootListSnapshot.addAll(tootListResponse)
+                tootList.postValue(tootListSnapshot)
+                hasNext = tootListResponse.isNotEmpty()
+            } catch (e: HttpException) {
+                when (e.code()) {
+                    HttpURLConnection.HTTP_FORBIDDEN -> {
+                        errorMessage.postValue("必要な権限がありません")
+                    }
+                }
+            } catch (e: IOException) {
+                errorMessage.postValue(
+                    "サーバーに接続できませんでした。${e.message}"
+                )
+            } finally {
+                isLoading.postValue(false)
+            }
         }
     }
 
@@ -97,18 +114,42 @@ class TootListViewModel(
 
     fun delete(toot: Toot) {
         coroutineScope.launch {
-            tootRepository.delete(toot.id)
+            try {
+                tootRepository.delete(toot.id)
 
-            val tootListSnapshot = tootList.value
-            tootListSnapshot?.remove(toot)
-            tootList.postValue(tootListSnapshot)
+                val tootListSnapshot = tootList.value
+                tootListSnapshot?.remove(toot)
+                tootList.postValue(tootListSnapshot)
+            } catch (e: HttpException) {
+                when (e.code()) {
+                    HttpURLConnection.HTTP_FORBIDDEN -> {
+                        errorMessage.postValue("必要な権限がありません")
+                    }
+                }
+            } catch (e: IOException) {
+                errorMessage.postValue(
+                    "サーバーに接続できませんでした。${e.message}"
+                )
+            }
         }
     }
 
     private suspend fun updateAccountInfo() {
-        val accountInfoSnapshot = accountInfo.value
-            ?: accountRepository.verifyAccountCredential()
+        try {
+            val accountInfoSnapshot = accountInfo.value
+                ?: accountRepository.verifyAccountCredential()
 
-        accountInfo.postValue(accountInfoSnapshot)
+            accountInfo.postValue(accountInfoSnapshot)
+        } catch (e: HttpException) {
+            when (e.code()) {
+                HttpURLConnection.HTTP_FORBIDDEN -> {
+                    errorMessage.postValue("必要な権限がありません")
+                }
+            }
+        } catch (e: IOException) {
+            errorMessage.postValue(
+                "サーバーに接続できませんでした。${e.message}"
+            )
+        }
     }
 }

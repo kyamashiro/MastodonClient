@@ -5,8 +5,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.example.mastodonclient.repository.TootRepository
 import com.example.mastodonclient.repository.UserCredentialRepository
+import java.net.HttpURLConnection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 class TootEditViewModel(
     private val instanceUrl: String,
@@ -43,11 +45,19 @@ class TootEditViewModel(
             }
             // Tootを投稿
             val tootRepository = TootRepository(credential)
-            tootRepository.postToot(
-                statusSnapshot
-            )
-            // 投稿完了フラグ TootEditFragmentで値が監視されている
-            postComplete.postValue(true)
+            try {
+                tootRepository.postToot(
+                    statusSnapshot
+                )
+                // 投稿完了フラグ TootEditFragmentで値が監視されている
+                postComplete.postValue(true)
+            } catch (e: HttpException) {
+                when (e.code()) {
+                    HttpURLConnection.HTTP_FORBIDDEN -> {
+                        errorMessage.postValue("必要な権限がありません")
+                    }
+                }
+            }
         }
     }
 }
