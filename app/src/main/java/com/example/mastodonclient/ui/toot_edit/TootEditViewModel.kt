@@ -1,11 +1,16 @@
 package com.example.mastodonclient.ui.toot_edit
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import com.example.mastodonclient.entity.LocalMedia
+import com.example.mastodonclient.repository.MediaFileRepository
 import com.example.mastodonclient.repository.TootRepository
 import com.example.mastodonclient.repository.UserCredentialRepository
+import java.io.IOException
 import java.net.HttpURLConnection
+import javax.xml.transform.OutputKeys.MEDIA_TYPE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -20,6 +25,7 @@ class TootEditViewModel(
     private val userCredentialRepository = UserCredentialRepository(
         application
     )
+    private val mediaFileRepository = MediaFileRepository(application)
 
     val status = MutableLiveData<String>()
     val postComplete = MutableLiveData<Boolean>()
@@ -59,5 +65,29 @@ class TootEditViewModel(
                 }
             }
         }
+    }
+
+    val mediaAttachments = MutableLiveData<ArrayList<LocalMedia>>()
+
+    fun addMedia(mediaUri: Uri) {
+        coroutineScope.launch {
+            try {
+                val bitmap = mediaFileRepository.readBitmap(mediaUri)
+                val tempFile = mediaFileRepository.saveBitmap(bitmap)
+
+                val newMediaAttachments = ArrayList<LocalMedia>()
+                mediaAttachments.value?.also {
+                    newMediaAttachments.addAll(it)
+                }
+                newMediaAttachments.add(LocalMedia(tempFile, MEDIA_TYPE))
+                mediaAttachments.postValue(newMediaAttachments)
+            } catch (e: IOException) {
+                handleMediaException(mediaUri, e)
+            }
+        }
+    }
+
+    private fun handleMediaException(mediaUri: Uri, e: IOException) {
+        errorMessage.postValue("メディアを読み込めません ${e.message} $mediaUri")
     }
 }
