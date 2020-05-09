@@ -4,14 +4,19 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mastodonclient.R
 import com.example.mastodonclient.databinding.ListItemTootBinding
 import com.example.mastodonclient.entity.Toot
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class TootListAdapter(
     private val layoutInflater: LayoutInflater,
-    private val tootList: ArrayList<Toot>,
+    private val coroutineScope: CoroutineScope,
     private val callback: Callback?
 ) :
     RecyclerView.Adapter<TootListAdapter.ViewHolder>() {
@@ -20,6 +25,21 @@ class TootListAdapter(
         fun openDetail(toot: Toot)
         fun delete(toot: Toot)
     }
+
+    var tootList: ArrayList<Toot> = ArrayList()
+        set(value) {
+            coroutineScope.launch(Dispatchers.Main) {
+                val diffResult = withContext(Dispatchers.Default) {
+                    DiffUtil.calculateDiff(
+                        RecyclerDiffCallback(field, value)
+                    )
+                }
+
+                field = value
+
+                diffResult.dispatchUpdatesTo(this@TootListAdapter)
+            }
+        }
 
     override fun getItemCount() = tootList.size
 
@@ -36,6 +56,25 @@ class TootListAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         // layout xmlのdataにbindする
         holder.bind(tootList[position])
+    }
+
+    private class RecyclerDiffCallback(
+        private val oldList: List<Toot>,
+        private val newList: List<Toot>
+    ) : DiffUtil.Callback() {
+
+        override fun getOldListSize() = oldList.size
+        override fun getNewListSize() = newList.size
+
+        override fun areItemsTheSame(
+            oldItemPosition: Int,
+            newItemPosition: Int
+        ) = oldList[oldItemPosition] == newList[newItemPosition]
+
+        override fun areContentsTheSame(
+            oldItemPosition: Int,
+            newItemPosition: Int
+        ) = oldList[oldItemPosition].id == newList[newItemPosition].id
     }
 
     class ViewHolder(

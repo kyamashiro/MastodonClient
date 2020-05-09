@@ -88,8 +88,10 @@ class TootListViewModel(
                     }
                 }
 
-                tootListSnapshot.addAll(tootListResponse)
-                tootList.postValue(tootListSnapshot)
+                val newTootList = ArrayList(tootListSnapshot).also {
+                    it.addAll(tootListResponse)
+                }
+                tootList.postValue(newTootList)
                 hasNext = tootListResponse.isNotEmpty()
             } catch (e: HttpException) {
                 when (e.code()) {
@@ -117,9 +119,12 @@ class TootListViewModel(
             try {
                 tootRepository.delete(toot.id)
 
-                val tootListSnapshot = tootList.value
-                tootListSnapshot?.remove(toot)
-                tootList.postValue(tootListSnapshot)
+                val tootListSnapshot = tootList.value ?: ArrayList()
+                val newTootList = ArrayList(tootListSnapshot)
+                    .also {
+                        it.remove(toot)
+                    }
+                tootList.postValue(newTootList)
             } catch (e: HttpException) {
                 when (e.code()) {
                     HttpURLConnection.HTTP_FORBIDDEN -> {

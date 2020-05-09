@@ -96,17 +96,7 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // 　tootListの値をArrayListとして代入する
-        val tootListSnapshot = viewModel.tootList.value ?: ArrayList<Toot>().also {
-            viewModel.tootList.value = it
-        }
-        // LayoutInflaterは、xmlレイアウトの1つから新しいView（またはLayout）オブジェクトを作成する
-        // 動的にxmlレイアウトをセットできる
-        adapter = TootListAdapter(
-            layoutInflater,
-            tootListSnapshot,
-            this
-        )
+        adapter = TootListAdapter(layoutInflater, lifecycleScope, this)
         layoutManager = LinearLayoutManager(
             requireContext(),
             LinearLayoutManager.VERTICAL,
@@ -149,7 +139,7 @@ class TootListFragment : Fragment(R.layout.fragment_toot_list),
         })
         // LiveDataの監視 フラグメントに反映させる
         viewModel.tootList.observe(viewLifecycleOwner, Observer {
-            adapter.notifyDataSetChanged()
+            adapter.tootList = it
         })
         viewLifecycleOwner.lifecycle.addObserver(viewModel)
     }
